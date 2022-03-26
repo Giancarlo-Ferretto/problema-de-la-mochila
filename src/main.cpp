@@ -1,7 +1,6 @@
 // Problema del ladrón.
 
 #include <iostream>
-#include <array>
 #include <list>
 #include <queue>
 
@@ -9,9 +8,14 @@ using namespace std;
 
 #define MAX_BAG_WEIGHT  15
 
+class Item {
+public:
+    int weight, price;
+};
+
 class Action {
 public:
-    int weight, price, taken;
+    Item item;
 };
 
 class State {
@@ -23,7 +27,7 @@ public:
 State transition(State& state, Action& action) {
     State new_state = state;
     new_state.items.push_back(action);
-    new_state.weight += action.weight;
+    new_state.weight += action.item.weight;
     return new_state;
 }
 
@@ -31,27 +35,36 @@ int is_valid_action(State& state) {
     return (state.weight <= MAX_BAG_WEIGHT);
 }
 
-list<Action> get_actions(State& state, Action items[]) {
+int is_state_has_action_item(State& state, Item& item) {
+    for(Action state_action : state.items) {
+       if(state_action.item.weight == item.weight && state_action.item.price == item.price) {
+           return 1;
+       }
+    }
+    return 0;
+}
+
+list<Action> get_actions(State& state, Item items[]) {
     list<Action> actions;
+    //printf("[%p] ", state);
     for(int i = 0; i < 10; i++) {
-        if(!items[i].taken) {
+        if(!is_state_has_action_item(state, items[i])) {
             state.weight += items[i].weight;
             if(is_valid_action(state)) {
-                //printf("disponible item %d$ %dkg\n", items[i].price, items[i].weight);
+                //printf("disponible item %d$ %dkg ", items[i].price, items[i].weight);
                 Action new_action; 
-                new_action.weight = items[i].weight;
-                new_action.price = items[i].price;
+                new_action.item.weight = items[i].weight;
+                new_action.item.price = items[i].price;
                 actions.push_back(new_action);
-                items[i].taken = 1;
             }
             state.weight -= items[i].weight;
         }
-        items[i].taken = 0;
     }
+    //printf("\n");
     return actions;
 }
 
-int breadth_first_search(State& initial_state, Action items[]) {
+int breadth_first_search(State& initial_state, Item items[]) {
     queue<State> bfs_queue;
     bfs_queue.push(initial_state);
 
@@ -62,16 +75,15 @@ int breadth_first_search(State& initial_state, Action items[]) {
         list<Action> actions = get_actions(new_state, items);
 
         if(actions.empty()) { //is_final_state?
-            for(Action saved_item : new_state.items) {
-                printf("item guardado %d$ %dkg \n", saved_item.price, saved_item.weight);
+            for(Action action : new_state.items) {
+                printf("item guardado %d$ %dkg \n", action.item.price, action.item.weight);
             }
             return new_state.items.size();
         }
         
-        for(Action action_iter : actions) {
-            State ss = transition(new_state, action_iter);
-            printf("items guardados estado %p: %d \n", ss, ss.items.size()); 
-
+        for(Action action : actions) {
+            State ss = transition(new_state, action);
+            //printf("items guardados estado %p: %d \n", ss, ss.items.size()); 
             bfs_queue.push(ss);
         }
     }
@@ -79,52 +91,32 @@ int breadth_first_search(State& initial_state, Action items[]) {
 }
 
 int main() {
-    Action items[10];
-
-    items[0].weight = 1;
-    items[0].price = 1;
-    items[0].taken = 0;
-
-    items[1].weight = 2;
-    items[1].price = 2;
-    items[1].taken = 0;
-
-    items[2].weight = 3;
-    items[2].price = 3;
-    items[2].taken = 0;
-
-    items[3].weight = 4;
-    items[3].price = 4;
-    items[3].taken = 0;
-
-    items[4].weight = 5;
-    items[4].price = 5;
-    items[4].taken = 0;
-
-    items[5].weight = 6;
-    items[5].price = 6;
-    items[5].taken = 0;
-
-    items[6].weight = 7;
-    items[6].price = 7;
-    items[6].taken = 0;
-
-    items[7].weight = 8;
-    items[7].price = 8;
-    items[7].taken = 0;
-
-    items[8].weight = 9;
-    items[8].price = 9;
-    items[8].taken = 0;
-
-    items[9].weight = 10;
-    items[9].price = 10;
-    items[9].taken = 0;
+    Item test_items[10];
+    test_items[0].weight = 1;
+    test_items[0].price = 1;
+    test_items[1].weight = 2;
+    test_items[1].price = 2;
+    test_items[2].weight = 3;
+    test_items[2].price = 3;
+    test_items[3].weight = 4;
+    test_items[3].price = 4;
+    test_items[4].weight = 5;
+    test_items[4].price = 5;
+    test_items[5].weight = 6;
+    test_items[5].price = 6;
+    test_items[6].weight = 7;
+    test_items[6].price = 7;
+    test_items[7].weight = 8;
+    test_items[7].price = 8;
+    test_items[8].weight = 9;
+    test_items[8].price = 9;
+    test_items[9].weight = 9;
+    test_items[9].price = 8;
 
     State initial_state;
     initial_state.weight = 0;
 
-    int steps = breadth_first_search(initial_state, items);
+    int steps = breadth_first_search(initial_state, test_items);
     printf("numero de items guardados: %d\n", steps);
     return 0;
 }
