@@ -11,6 +11,7 @@ using namespace std;
 class Item { //los items a tomar con su peso y valor
 public:
     int weight, price;
+    string nombre;
 };
 
 class Action { //la acción es un item a tomar
@@ -55,6 +56,8 @@ list<Action> get_actions(State& state, Item items[]) {
                 Action new_action; 
                 new_action.item.weight = items[i].weight;
                 new_action.item.price = items[i].price;
+                new_action.item.nombre = items[i].nombre;
+
                 actions.push_back(new_action);
             }
             state.weight -= items[i].weight;
@@ -67,6 +70,8 @@ list<Action> get_actions(State& state, Item items[]) {
 int breadth_first_search(State& initial_state, Item items[]) {
     queue<State> bfs_queue;
     bfs_queue.push(initial_state);
+    int sum_valor = 0;
+
     while(!bfs_queue.empty()) {
         State new_state = bfs_queue.front();
         bfs_queue.pop();
@@ -74,8 +79,11 @@ int breadth_first_search(State& initial_state, Item items[]) {
         list<Action> actions = get_actions(new_state, items);
         if(actions.empty()) { //is_final_state? encuentra el primer estado final y lo retorna
             for(Action action : new_state.items) {
-                printf("item guardado %d$ %dkg \n", action.item.price, action.item.weight);
+                printf("Se ha guardado el item: %s con un valor de %d$ y con un peso de %dkg \n", action.item.nombre.c_str(), action.item.price, action.item.weight);
+                sum_valor += action.item.price;
             }
+            printf("Valor total de los items en la mochila: %d \n", sum_valor);
+
             return new_state.items.size();
         }
     
@@ -92,29 +100,48 @@ int main() {
     Item test_items[10]; //listado de items disponibles para tomar
     test_items[0].weight = 1;
     test_items[0].price = 1;
+    test_items[0].nombre = "cortauñas";
+    
     test_items[1].weight = 2;
     test_items[1].price = 2;
-    test_items[2].weight = 3;
-    test_items[2].price = 3;
+    test_items[1].nombre = "sacacorchos";
+    
+    test_items[2].weight = 1;
+    test_items[2].price = 11;
+    test_items[2].nombre = "gorro NY yankees";
+    
     test_items[3].weight = 4;
     test_items[3].price = 4;
+    test_items[3].nombre = "mancuernas 10kg";
+    
     test_items[4].weight = 5;
     test_items[4].price = 5;
+    test_items[4].nombre = "vino gato";
+    
     test_items[5].weight = 6;
     test_items[5].price = 6;
+    test_items[5].nombre = "alfombra roja";
+    
     test_items[6].weight = 7;
     test_items[6].price = 7;
+    test_items[6].nombre = "six pack corona";
+    
     test_items[7].weight = 8;
     test_items[7].price = 8;
+    test_items[7].nombre = "whisky jack daniels";
+    
     test_items[8].weight = 9;
-    test_items[8].price = 9;
+    test_items[8].price = 15;
+    test_items[8].nombre = "zapatos versace";
+    
     test_items[9].weight = 9;
     test_items[9].price = 8;
+    test_items[9].nombre = "placa de marmol";
 
     State initial_state; //mochila inicial y vacía
     initial_state.weight = 0;
 
     int steps = breadth_first_search(initial_state, test_items); //algoritmo bfs
-    printf("numero de items guardados: %d\n", steps);
+    printf("Cantidad de items en la mochila: %d\n", steps);
     return 0;
 }
