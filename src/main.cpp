@@ -25,15 +25,13 @@ public:
     int weight;
 };
 
-State transition(State& state, Action& action) { //transición, se le agrega una acción al estado / toma un item
-    State new_state = state;
-    new_state.items.push_back(action);
-    new_state.weight += action.item.weight;
-    return new_state;
-}
-
 int is_valid_action(State& state) { //la acción es válida si el peso de la mochila no supera al máximo
     return (state.weight <= MAX_BAG_WEIGHT);
+}
+
+int is_final_state(list<Action> actions) {
+    if(actions.empty()) return 1;
+    return 0;
 }
 
 int is_state_has_action_item(State& state, Item& item) {
@@ -47,53 +45,97 @@ int is_state_has_action_item(State& state, Item& item) {
 
 list<Action> get_actions(State& state, Item items[]) {
     list<Action> actions;
-    //printf("[%p] ", state);
     for(int i = 0; i < 10; i++) {
         if(!is_state_has_action_item(state, items[i])) { //si el item no ha sido guardado en la mochila lo toma
             state.weight += items[i].weight;
             if(is_valid_action(state)) {
-                //printf("disponible item %d$ %dkg ", items[i].price, items[i].weight);
                 Action new_action; 
                 new_action.item.weight = items[i].weight;
                 new_action.item.price = items[i].price;
                 new_action.item.nombre = items[i].nombre;
-
                 actions.push_back(new_action);
             }
             state.weight -= items[i].weight;
         }
     }
-    //printf("\n");
     return actions;
 }
 
-int breadth_first_search(State& initial_state, Item items[]) {
+State transition(State& state, Action& action) { //transición, se le agrega una acción al estado / toma un item
+    State new_state = state;
+    new_state.items.push_back(action);
+    new_state.weight += action.item.weight;
+    return new_state;
+}
+
+float heuristic_eval(State& state) {
+    float price = 0.0;
+    float weight = 0.0;
+    for(Action action : state.items) {
+        price += action.item.price;
+        weight += action.item.weight;
+    }
+    float eval = (price/weight);
+    return eval;
+}
+
+class Compare {
+public:
+    bool operator() (State a, State b) {
+        float eval_a = heuristic_eval(a);
+        float eval_b = heuristic_eval(b);
+        
+        if(eval_a <= eval_b) return true;
+        return false;
+    }
+};
+
+State breadth_first_search(State& initial_state, Item items[]) {
     queue<State> bfs_queue;
     bfs_queue.push(initial_state);
-    int sum_valor = 0;
+    int count = 0;
 
     while(!bfs_queue.empty()) {
-        State new_state = bfs_queue.front();
+        State state = bfs_queue.front();
         bfs_queue.pop();
 
-        list<Action> actions = get_actions(new_state, items);
-        if(actions.empty()) { //is_final_state? encuentra el primer estado final y lo retorna
-            for(Action action : new_state.items) {
-                printf("Se ha guardado el item: %s con un valor de %d$ y con un peso de %dkg \n", action.item.nombre.c_str(), action.item.price, action.item.weight);
-                sum_valor += action.item.price;
-            }
-            printf("Valor total de los items en la mochila: %d \n", sum_valor);
-
-            return new_state.items.size();
+        list<Action> actions = get_actions(state, items);
+        if(is_final_state(actions)) {
+            printf("[BREADTH FIRST] Cantidad de nodos visitados: %d \n", count);
+            return state;    
         }
-    
+
         for(Action action : actions) {
-            State ss = transition(new_state, action);
-            //printf("items guardados estado %p: %d \n", ss, ss.items.size()); 
+            State ss = transition(state, action);
             bfs_queue.push(ss);
+            count++;
         }
     }
-    return -1;
+    return State();
+}
+
+State best_first(State& initial_state, Item items[]) {
+    priority_queue<State, vector<State>, Compare> queue;
+    queue.push(initial_state);
+    int count = 0;
+
+    while(!queue.empty()) {
+        State state = queue.top();
+        queue.pop();
+    
+        list<Action> actions = get_actions(state, items);
+        if(is_final_state(actions)) {
+            printf("[BEST FIRST] Cantidad de nodos visitados: %d \n", count);
+            return state;
+        }
+
+        for(Action action : actions) {
+            State ss = transition(state, action);
+            queue.push(ss);
+            count++;
+        }
+    }
+    return State();
 }
 
 int main() {
@@ -141,7 +183,15 @@ int main() {
     State initial_state; //mochila inicial y vacía
     initial_state.weight = 0;
 
-    int steps = breadth_first_search(initial_state, test_items); //algoritmo bfs
-    printf("Cantidad de items en la mochila: %d\n", steps);
+    //State final_state = breadth_first_search(initial_state, test_items); //algoritmo bfs
+    State final_state = best_first(initial_state, test_items); //algoritmo best first
+    
+    int sum_valor;
+    for(Action action : final_state.items) {
+        printf("[MOCHILA] Se ha guardado el item: %s con un valor de %d$ y con un peso de %dkg \n", action.item.nombre.c_str(), action.item.price, action.item.weight);
+        sum_valor += action.item.price;
+    }
+    printf("[MOCHILA] Valor total de los %d items en la mochila: $%d \n", final_state.items.size(), sum_valor);
+    printf("[EVALUACIÓN MOCHILA] Evaluación heurística: %f\n", heuristic_eval(final_state));
     return 0;
 }
