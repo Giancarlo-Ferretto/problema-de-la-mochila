@@ -45,7 +45,7 @@ int is_state_has_action_item(State& state, Item& item) {
 
 list<Action> get_actions(State& state, Item items[]) {
     list<Action> actions;
-    for(int i = 0; i < 10; i++) {
+    for(int i = 0; i < 20; i++) {
         if(!is_state_has_action_item(state, items[i])) { //si el item no ha sido guardado en la mochila lo toma
             state.weight += items[i].weight;
             if(is_valid_action(state)) {
@@ -139,7 +139,7 @@ State best_first(State& initial_state, Item items[]) {
 }
 
 int main() {
-    Item test_items[10]; //listado de items disponibles para tomar
+    Item test_items[20]; //listado de items disponibles para tomar
     test_items[0].weight = 1;
     test_items[0].price = 1;
     test_items[0].nombre = "cortauñas";
@@ -179,6 +179,46 @@ int main() {
     test_items[9].weight = 9;
     test_items[9].price = 8;
     test_items[9].nombre = "placa de marmol";
+
+    test_items[10].weight = 12;
+    test_items[10].price = 9;
+    test_items[10].nombre = "zapatillas nike";
+
+    test_items[11].weight = 4;
+    test_items[11].price = 5;
+    test_items[11].nombre = "skateboard";
+
+    test_items[12].weight = 3;
+    test_items[12].price = 7;
+    test_items[12].nombre = "disco de vinilo";
+
+    test_items[13].weight = 4;
+    test_items[13].price = 3;
+    test_items[13].nombre = "microondas";
+
+    test_items[14].weight = 1;
+    test_items[14].price = 1;
+    test_items[14].nombre = "moneda de 500";
+
+    test_items[15].weight = 3;
+    test_items[15].price = 4;
+    test_items[15].nombre = "album power rangers";
+
+    test_items[16].weight = 2;
+    test_items[16].price = 2;
+    test_items[16].nombre = "album the beatles";
+
+    test_items[17].weight = 6;
+    test_items[17].price = 7;
+    test_items[17].nombre = "guitarra gibson";
+
+    test_items[18].weight = 3;
+    test_items[18].price = 5;
+    test_items[18].nombre = "navaja victorinox";
+
+    test_items[19].weight = 5;
+    test_items[19].price = 3;
+    test_items[19].nombre = "llave inglesa";
 
     State initial_state; //mochila inicial y vacía
     initial_state.weight = 0;
