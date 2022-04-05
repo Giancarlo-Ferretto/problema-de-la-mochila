@@ -48,3 +48,6 @@ Esta función recibe un objeto tipo State y retorna un valor numérico de tipo f
 
 Esta función recibe el estado inicial y un arreglo de objetos del tipo Item que corresponde al dataset. Lo primero que hace es inicializar una cola de prioridad y define como función de comparación Compare( ) para la priorización de la cola, la que retorna un boolean TRUE si la cola está correctamente ordenada con los items de mayor prioridad al comienzo. Luego agrega a la cola el estado inicial con un push(), entrando a un ciclo iterativo que termina cuando se vacía la cola de prioridad. 
 Este ciclo iterativo recoge y quita el State de mayor prioridad de la cola, recogiendo las acciones de este estado con get_actions( ) para comprobar si es el estado final. De no ser el estado final, se entra a la función transition(state, action), creando un nuevo State por cada acción posible y agregando estos hijos del State padre a la cola de prioridad, finalmente terminando el ciclo y comenzando desde el inicio del bucle. De lo contrario, si es el estado final, se retorna el final State y se imprime la cantidad de nodos visitados.
+
+# Vídeo presentación
+https://drive.google.com/file/d/1KJyt6AdRCM57bwu7XXcoXVf4eho8r49Q/view?usp=sharing
